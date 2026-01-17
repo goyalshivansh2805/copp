@@ -78,6 +78,7 @@ function TabNavigator() {
         component={CartScreen}
         options={{
           tabBarLabel: '',
+          tabBarStyle: { display: 'none' },
           tabBarIcon: ({ color, focused }) => (
             <View style={{ marginTop: -30 }}>
               <View style={{

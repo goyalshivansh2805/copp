@@ -22,10 +22,11 @@ const SIZES = ['38', '39', '40', '41', '42', '43'];
 
 export default function ProductDetailScreen({ route, navigation }) {
   const { product } = route.params;
-  const { addToCart, cartItems, updateQuantity } = useCart();
+  const { addToCart, cartItems, updateQuantity, cartItemCount } = useCart();
   
   const [selectedSizeTab, setSelectedSizeTab] = useState('EU');
   const [selectedSize, setSelectedSize] = useState('40');
+  const [showGoToCart, setShowGoToCart] = useState(false);
 
   const itemId = `${product.id}-${selectedSize}`;
   const cartItem = cartItems.find(item => item.itemId === itemId);
@@ -37,6 +38,22 @@ export default function ProductDetailScreen({ route, navigation }) {
       size: selectedSize,
       quantity: 1,
     });
+    
+    // Show "Go to Cart" popup for 2 seconds
+    setShowGoToCart(true);
+    setTimeout(() => {
+      setShowGoToCart(false);
+    }, 2000);
+  };
+
+  const handleIncrement = () => {
+    updateQuantity(itemId, quantityInCart + 1);
+    
+    // Show "Go to Cart" popup for 2 seconds
+    setShowGoToCart(true);
+    setTimeout(() => {
+      setShowGoToCart(false);
+    }, 2000);
   };
 
   return (
@@ -57,6 +74,11 @@ export default function ProductDetailScreen({ route, navigation }) {
           onPress={() => navigation.navigate('Main', { screen: 'CartTab' })}
         >
           <Ionicons name="bag-outline" size={26} color="#1F2937" />
+          {cartItemCount > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartItemCount}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -177,7 +199,7 @@ export default function ProductDetailScreen({ route, navigation }) {
             <Text style={styles.quantityNumberBottom}>{quantityInCart}</Text>
             <TouchableOpacity 
               style={styles.quantityBtnBottom}
-              onPress={() => updateQuantity(itemId, quantityInCart + 1)}
+              onPress={handleIncrement}
             >
               <Ionicons name="add" size={20} color="#5B9FED" />
             </TouchableOpacity>
@@ -191,6 +213,23 @@ export default function ProductDetailScreen({ route, navigation }) {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Go to Cart Popup */}
+      {showGoToCart && (
+        <View style={styles.goToCartOverlay}>
+          <TouchableOpacity 
+            style={styles.goToCartButton}
+            onPress={() => {
+              setShowGoToCart(false);
+              navigation.navigate('Main', { screen: 'CartTab' });
+            }}
+          >
+            <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+            <Text style={styles.goToCartText}>Go to Cart</Text>
+            <Ionicons name="arrow-forward" size={20} color="#5B9FED" />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -225,6 +264,23 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FF6B6B',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFF',
   },
   scrollView: {
     flex: 1,
@@ -435,5 +491,31 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     minWidth: 30,
     textAlign: 'center',
+  },
+  goToCartOverlay: {
+    position: 'absolute',
+    bottom: 90,
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+  },
+  goToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 50,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  goToCartText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
   },
 });
