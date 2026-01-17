@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,243 +6,184 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  TextInput,
   StatusBar,
 } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../context/CartContext';
 
-const PRODUCTS = [
+const BRANDS = [
+  { id: 1, name: 'Nike', logo: '✓', selected: true },
+  { id: 2, name: 'puma', logo: '🐆', selected: false },
+  { id: 3, name: 'UNDER ARMOUR', logo: 'UA', selected: false },
+  { id: 4, name: 'adidas', logo: '⚽', selected: false },
+  { id: 5, name: 'CONVERSE', logo: '★', selected: false },
+];
+
+const POPULAR_SHOES = [
   {
     id: 1,
-    name: 'Air Max 97',
-    price: '$20.99',
-    rating: 4.8,
+    name: 'Nike Jordan',
+    price: 493.00,
+    badge: 'BEST SELLER',
     image: require('../assets/shoe1.png'),
   },
   {
     id: 2,
-    name: 'React Presto',
-    price: '$25.99',
-    rating: 4.8,
+    name: 'Nike Air Max',
+    price: 897.99,
+    badge: 'BEST SELLER',
     image: require('../assets/shoe2.png'),
   },
-  {
-    id: 3,
-    name: 'Nike Legend Essential',
-    price: '$22.99',
-    rating: 4.8,
-    image: require('../assets/shoe3.png'),
-  },
-  {
-    id: 4,
-    name: 'Nike Legend Essential',
-    price: '$24.99',
-    rating: 4.8,
-    image: require('../assets/shoe4.png'),
-  },
 ];
 
-const CATEGORIES = [
-  { name: 'Lifestyle', items: 35 },
-  { name: 'Running', items: 24 },
-  { name: 'Tennis', items: 13 },
-];
+const NEW_ARRIVAL = {
+  id: 3,
+  name: 'Nike Air Jordan',
+  price: 849.69,
+  badge: 'BEST CHOICE',
+  image: require('../assets/shoe3.png'),
+};
 
 export default function HomeScreen({ navigation }) {
-  const { getTotalItems, latestOrder } = useCart();
-  const [activeCategory, setActiveCategory] = useState(0);
-  const [bookmarked, setBookmarked] = useState({});
-
-  const toggleBookmark = (id) => {
-    setBookmarked((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handleProductPress = (product) => {
-    navigation.getParent()?.navigate('ProductDetail', { product });
-  };
-
-  const cartItemCount = getTotalItems();
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Processing':
-        return '#F59E0B';
-      case 'Shipped':
-        return '#3B82F6';
-      case 'Delivered':
-        return '#10B981';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Processing':
-        return 'hourglass-outline';
-      case 'Shipped':
-        return 'airplane-outline';
-      case 'Delivered':
-        return 'checkmark-circle-outline';
-      default:
-        return 'cube-outline';
-    }
-  };
+  const { cartItemCount } = useCart();
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView 
-        style={styles.scrollView} 
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.menuButton}>
-            <View style={styles.menuGrid}>
-              <View style={styles.menuCircle} />
-              <View style={styles.menuCircle} />
-              <View style={styles.menuCircle} />
-              <View style={styles.menuCircle} />
-            </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.menuButton}>
+          <View style={styles.dotsGrid}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
           </View>
-          <TouchableOpacity 
-            style={styles.bagButton}
-            onPress={() => navigation.navigate('CartTab')}
-          >
-            <Feather name="shopping-bag" size={24} color="#000" />
-            {cartItemCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{cartItemCount}</Text>
-              </View>
-            )}
+        </TouchableOpacity>
+        
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationLabel}>Store location</Text>
+          <View style={styles.locationRow}>
+            <Ionicons name="location" size={18} color="#FF6B6B" />
+            <Text style={styles.locationText}>Mondolibug, Sylhet</Text>
+          </View>
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.cartButton}
+          onPress={() => navigation.navigate('Main', { screen: 'CartTab' })}
+        >
+          <Ionicons name="bag-outline" size={28} color="#1F2937" />
+          {cartItemCount > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartItemCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={24} color="#9CA3AF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Looking for shoes"
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
+
+        {/* Brand Pills */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.brandsContainer}
+          contentContainerStyle={styles.brandsContent}
+        >
+          {BRANDS.map((brand) => (
+            <TouchableOpacity
+              key={brand.id}
+              style={[
+                styles.brandPill,
+                brand.selected && styles.brandPillSelected,
+              ]}
+            >
+              {brand.selected ? (
+                <>
+                  <View style={styles.brandIconCircleSelected}>
+                    <Text style={styles.brandIconSelected}>✓</Text>
+                  </View>
+                  <Text style={styles.brandTextSelected}>Nike</Text>
+                </>
+              ) : (
+                <Text style={styles.brandTextUnselected}>{brand.name}</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Popular Shoes */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Popular Shoes</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAllText}>See all</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>New Collection</Text>
-          <Text style={styles.subtitle}>Explore the new collection of sneakers</Text>
-        </View>
-
-        {/* Blue Banner - Order Status */}
-        {latestOrder ? (
-          <View style={styles.banner}>
-            <View style={styles.bannerContent}>
-              <View style={styles.orderHeader}>
-                <Text style={styles.orderLabel}>Latest Order</Text>
-                <Text style={styles.orderId}>#{latestOrder.id}</Text>
-              </View>
-              
-              <View style={styles.orderStatus}>
-                <View style={styles.statusBadge}>
-                  <Ionicons 
-                    name={getStatusIcon(latestOrder.status)} 
-                    size={20} 
-                    color={getStatusColor(latestOrder.status)} 
-                  />
-                  <Text style={[styles.statusText, { color: getStatusColor(latestOrder.status) }]}>
-                    {latestOrder.status}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.orderFooter}>
-                <View>
-                  <Text style={styles.deliveryLabel}>Estimated Delivery</Text>
-                  <Text style={styles.deliveryDate}>{latestOrder.estimatedDelivery}</Text>
-                </View>
-                <TouchableOpacity 
-                  style={styles.trackButton}
-                  onPress={() => navigation.getParent()?.navigate('OrderStatus', { order: latestOrder })}
-                >
-                  <Text style={styles.trackButtonText}>Track</Text>
-                  <Ionicons name="arrow-forward" size={16} color="#0066FF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.banner}>
-            <View style={styles.bannerContent}>
-              <View style={styles.emptyBanner}>
-                <Ionicons name="gift-outline" size={48} color="rgba(255,255,255,0.3)" />
-                <Text style={styles.emptyBannerText}>No orders yet</Text>
-                <Text style={styles.emptyBannerSubtext}>Start shopping to track your orders</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Categories */}
-        <View style={styles.categoriesContainer}>
-          {CATEGORIES.map((category, index) => (
+        <View style={styles.popularGrid}>
+          {POPULAR_SHOES.map((shoe) => (
             <TouchableOpacity
-              key={index}
-              onPress={() => setActiveCategory(index)}
-              style={styles.categoryButton}
-            >
-              <Text
-                style={[
-                  styles.categoryName,
-                  activeCategory === index && styles.categoryNameActive,
-                ]}
-              >
-                {category.name}
-              </Text>
-              <Text
-                style={[
-                  styles.categoryItems,
-                  activeCategory === index && styles.categoryItemsActive,
-                ]}
-              >
-                {category.items} Items
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Products Grid */}
-        <View style={styles.productsGrid}>
-          {PRODUCTS.map((product) => (
-            <TouchableOpacity 
-              key={product.id} 
+              key={shoe.id}
               style={styles.productCard}
-              onPress={() => handleProductPress(product)}
-              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProductDetail', { product: shoe })}
             >
-              <View style={styles.productHeader}>
-                <View style={styles.ratingContainer}>
-                  <Ionicons name="star-outline" size={18} color="#D1D5DB" />
-                  <Text style={styles.ratingText}>{product.rating}</Text>
-                </View>
-                <TouchableOpacity onPress={() => toggleBookmark(product.id)}>
-                  <Feather
-                    name="bookmark"
-                    size={20}
-                    color="#D1D5DB"
-                  />
-                </TouchableOpacity>
-              </View>
-
               <View style={styles.productImageContainer}>
                 <Image 
-                  source={product.image} 
+                  source={shoe.image}
                   style={styles.productImage}
                   resizeMode="contain"
                 />
               </View>
-
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{product.name}</Text>
-                <Text style={styles.productPrice}>{product.price}</Text>
-              </View>
+              <Text style={styles.productBadge}>{shoe.badge}</Text>
+              <Text style={styles.productName}>{shoe.name}</Text>
+              <Text style={styles.productPrice}>${shoe.price.toFixed(2)}</Text>
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* New Arrivals */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>New Arrivals</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAllText}>See all</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.newArrivalCard}
+          onPress={() => navigation.navigate('ProductDetail', { product: NEW_ARRIVAL })}
+        >
+          <View style={styles.newArrivalInfo}>
+            <Text style={styles.newArrivalBadge}>{NEW_ARRIVAL.badge}</Text>
+            <Text style={styles.newArrivalName}>{NEW_ARRIVAL.name}</Text>
+            <Text style={styles.newArrivalPrice}>${NEW_ARRIVAL.price.toFixed(2)}</Text>
+          </View>
+          <View style={styles.newArrivalImageContainer}>
+            <Image 
+              source={NEW_ARRIVAL.image}
+              style={styles.newArrivalImage}
+              resizeMode="contain"
+            />
+          </View>
+        </TouchableOpacity>
+
+        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
@@ -251,256 +192,244 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: '#F8F9FA',
   },
   menuButton: {
-    padding: 4,
-  },
-  menuGrid: {
-    width: 22,
-    height: 22,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignContent: 'space-between',
-  },
-  menuCircle: {
-    width: 8,
-    height: 8,
-    backgroundColor: '#000',
-    borderRadius: 4,
-  },
-  bagButton: {
-    padding: 4,
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: '#DC2626',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 5,
   },
-  badgeText: {
-    color: '#FFF',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  titleSection: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#000000',
-    marginBottom: 6,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#A8A8A8',
-  },
-  banner: {
-    marginHorizontal: 24,
-    height: 150,
-    backgroundColor: '#0066FF',
-    borderRadius: 24,
-    marginBottom: 30,
-    overflow: 'hidden',
-  },
-  bannerContent: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'space-between',
-  },
-  orderHeader: {
+  dotsGrid: {
+    width: 32,
+    height: 32,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  orderLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.8)',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  orderId: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  orderStatus: {
-    marginVertical: 8,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
+    flexWrap: 'wrap',
     gap: 6,
   },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '700',
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1F2937',
   },
-  orderFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+  locationContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
-  deliveryLabel: {
+  locationLabel: {
     fontSize: 11,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.7)',
+    color: '#9CA3AF',
     marginBottom: 2,
   },
-  deliveryDate: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  trackButton: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
     gap: 4,
   },
-  trackButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0066FF',
+  locationText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1F2937',
   },
-  emptyBanner: {
-    flex: 1,
+  cartButton: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FF6B6B',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyBannerText: {
-    fontSize: 16,
+  cartBadgeText: {
+    fontSize: 9,
     fontWeight: '700',
     color: '#FFF',
-    marginTop: 8,
   },
-  emptyBannerSubtext: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
+  scrollView: {
+    flex: 1,
   },
-  categoriesContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    gap: 30,
-  },
-  categoryButton: {
-    alignItems: 'flex-start',
-  },
-  categoryName: {
-    fontSize: 18,
-    fontWeight: '400',
-    color: '#D1D5DB',
-    marginBottom: 4,
-  },
-  categoryNameActive: {
-    fontWeight: '700',
-    color: '#000000',
-  },
-  categoryItems: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#D1D5DB',
-  },
-  categoryItemsActive: {
-    color: '#6B7280',
-  },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1F2937',
+    marginLeft: 12,
+  },
+  brandsContainer: {
+    marginBottom: 32,
+  },
+  brandsContent: {
+    gap: 12,
+  },
+  brandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 50,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  brandPillSelected: {
+    backgroundColor: '#5B9FED',
+  },
+  brandIconCircleSelected: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandIconSelected: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#5B9FED',
+  },
+  brandTextSelected: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  brandTextUnselected: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  seeAllText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#5B9FED',
+  },
+  popularGrid: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 32,
   },
   productCard: {
-    width: '47.5%',
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
-    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 12,
     elevation: 3,
-  },
-  productHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
   },
   productImageContainer: {
     width: '100%',
-    height: 110,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 120,
     marginBottom: 12,
   },
   productImage: {
     width: '100%',
     height: '100%',
   },
-  productInfo: {
-    gap: 4,
+  productBadge: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#5B9FED',
+    marginBottom: 4,
+    letterSpacing: 0.3,
   },
   productName: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    fontWeight: '400',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
   },
   productPrice: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  newArrivalCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  newArrivalInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  newArrivalBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#5B9FED',
+    marginBottom: 6,
+    letterSpacing: 0.3,
+  },
+  newArrivalName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 10,
+  },
+  newArrivalPrice: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000000',
+    color: '#1F2937',
+  },
+  newArrivalImageContainer: {
+    width: 140,
+    height: 140,
+  },
+  newArrivalImage: {
+    width: '100%',
+    height: '100%',
   },
 });
-

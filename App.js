@@ -39,19 +39,17 @@ function TabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#0066FF',
+        tabBarActiveTintColor: '#5B9FED',
         tabBarInactiveTintColor: '#9CA3AF',
+        tabBarShowLabel: false,
         tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-          borderTopWidth: 1,
-          borderTopColor: '#F3F4F6',
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 10,
+          borderTopWidth: 0,
           backgroundColor: '#FFFFFF',
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
+          elevation: 0,
+          shadowOpacity: 0,
         },
       }}
     >
@@ -66,12 +64,12 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen 
-        name="Orders" 
-        component={MyOrdersScreen}
+        name="Favorites" 
+        component={ProfileScreen}
         options={{
-          tabBarLabel: 'Orders',
+          tabBarLabel: '',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={26} color={color} />
           ),
         }}
       />
@@ -79,9 +77,35 @@ function TabNavigator() {
         name="CartTab" 
         component={CartScreen}
         options={{
-          tabBarLabel: 'Cart',
+          tabBarLabel: '',
           tabBarIcon: ({ color, focused }) => (
-            <CartTabIcon color={color} focused={focused} />
+            <View style={{ marginTop: -30 }}>
+              <View style={{
+                width: 70,
+                height: 70,
+                borderRadius: 35,
+                backgroundColor: '#5B9FED',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#5B9FED',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}>
+                <Ionicons name="bag-handle" size={32} color="#FFF" />
+              </View>
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Notifications" 
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: '',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={26} color={color} />
           ),
         }}
       />
@@ -89,9 +113,9 @@ function TabNavigator() {
         name="Profile" 
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: '',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={26} color={color} />
           ),
         }}
       />

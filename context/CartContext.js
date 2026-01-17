@@ -16,8 +16,8 @@ export const CartProvider = ({ children }) => {
   const [latestOrder, setLatestOrder] = useState(null);
   const [savedAddress, setSavedAddress] = useState(null);
 
-  const addToCart = (product, size, color) => {
-    const itemId = `${product.id}-${size}-${color}`;
+  const addToCart = ({ product, size, quantity = 1 }) => {
+    const itemId = `${product.id}-${size}`;
     
     setCartItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex(
@@ -27,7 +27,7 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex > -1) {
         // Item exists, increase quantity
         const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += 1;
+        updatedItems[existingItemIndex].quantity += quantity;
         return updatedItems;
       } else {
         // New item
@@ -37,8 +37,7 @@ export const CartProvider = ({ children }) => {
             itemId,
             product,
             size,
-            color,
-            quantity: 1,
+            quantity,
           },
         ];
       }
@@ -72,7 +71,9 @@ export const CartProvider = ({ children }) => {
 
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => {
-      const price = parseFloat(item.product.price.replace('$', ''));
+      const price = typeof item.product.price === 'string' 
+        ? parseFloat(item.product.price.replace('$', '')) 
+        : item.product.price;
       return total + (price * item.quantity);
     }, 0);
   };
@@ -127,10 +128,13 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getTotalPrice,
     getTotalItems,
+    cartTotal: getTotalPrice(),
+    cartItemCount: getTotalItems(),
     latestOrder,
     orders,
     placeOrder,
     savedAddress,
+    saveAddress: setSavedAddress,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

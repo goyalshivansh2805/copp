@@ -6,52 +6,30 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const PROGRESS_STEPS = [
-  { id: 1, label: 'Confirmed', icon: 'checkmark', completed: true },
-  { id: 2, label: 'Packed', icon: 'cube', completed: true },
-  { id: 3, label: 'Shipped', icon: 'car', completed: false },
-  { id: 4, label: 'Delivered', icon: 'home', completed: false },
-];
+const TABS = ['Tracking', 'Order Details', 'Setup', 'Reviews'];
 
-const GUIDES = [
-  { 
-    id: 1, 
-    icon: 'play-circle', 
-    iconColor: '#3B82F6',
-    title: 'Quick Setup Guide', 
-    subtitle: '3 min watch • Get up and running' 
-  },
-  { 
-    id: 2, 
-    icon: 'bulb', 
-    iconColor: '#F59E0B',
-    title: 'Pro Usage Tips', 
-    subtitle: 'Maximize your product\'s potential' 
-  },
-  { 
-    id: 3, 
-    icon: 'color-wand', 
-    iconColor: '#8B5CF6',
-    title: 'Care Instructions', 
-    subtitle: 'Keep it looking brand new' 
-  },
+const TRACKING_TIMELINE = [
+  { id: 1, title: 'Delivered', completed: false },
+  { id: 2, title: 'Out for delivery', completed: false },
+  { id: 3, title: 'In transit', time: 'Today at 9:42 AM', completed: true, current: true },
+  { id: 4, title: 'Shipped', time: 'Jan 18 at 2:15 PM', completed: true },
+  { id: 5, title: 'Packed', time: 'Jan 18 at 10:30 AM', completed: true },
+  { id: 6, title: 'Order confirmed', time: 'Jan 17 at 8:20 PM', completed: true },
 ];
 
 export default function OrderDetailsScreen({ route, navigation }) {
   const { order } = route.params;
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState('Tracking');
 
-  const subtotal = order.total / 1.1;
-  const tax = subtotal * 0.1;
-  const delivery = 8.00;
-  const discount = 10.00;
+  const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -59,15 +37,10 @@ export default function OrderDetailsScreen({ route, navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Order #{order.id}</Text>
-          <Text style={styles.headerSubtitle}>PLACED JAN 17</Text>
-        </View>
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Order Details</Text>
+        <View style={styles.backButton} />
       </View>
 
       <ScrollView 
@@ -75,196 +48,173 @@ export default function OrderDetailsScreen({ route, navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Delivery Status */}
-        <View style={styles.deliverySection}>
-          <Text style={styles.deliveryLabel}>ESTIMATED DELIVERY</Text>
-          <View style={styles.deliveryRow}>
-            <Text style={styles.deliveryDate}>Jan 22 – Jan 24</Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>In Transit</Text>
+        {/* Order Info Card */}
+        <View style={styles.orderCard}>
+          <View style={styles.orderHeader}>
+            <View>
+              <Text style={styles.orderLabel}>ORDER ID</Text>
+              <Text style={styles.orderId}>#{order.id}</Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={styles.orderLabel}>DELIVERY DATE</Text>
+              <Text style={styles.deliveryDate}>Jan 22, 2026</Text>
             </View>
           </View>
-        </View>
 
-        {/* Progress Tracker */}
-        <View style={styles.progressTracker}>
-          {PROGRESS_STEPS.map((step, index) => (
-            <View key={step.id} style={styles.progressStep}>
-              <View style={[
-                styles.progressIcon,
-                step.completed && styles.progressIconCompleted,
-              ]}>
-                <Ionicons 
-                  name={step.icon} 
-                  size={20} 
-                  color={step.completed ? '#FFF' : '#D1D5DB'} 
+          {/* Product Info */}
+          <View style={styles.productRow}>
+            <View style={styles.productImageBox}>
+              {firstItem ? (
+                <Image 
+                  source={firstItem.product.image}
+                  style={styles.productImage}
+                  resizeMode="contain"
                 />
-              </View>
-              {index < PROGRESS_STEPS.length - 1 && (
-                <View style={[
-                  styles.progressLine,
-                  step.completed && styles.progressLineCompleted,
-                ]} />
+              ) : (
+                <View style={styles.productImagePlaceholder}>
+                  <Ionicons name="cube-outline" size={32} color="#9CA3AF" />
+                </View>
               )}
-              <Text style={[
-                styles.progressLabel,
-                step.completed && styles.progressLabelCompleted,
-              ]}>
-                {step.label}
+            </View>
+            <View style={styles.productInfo}>
+              <Text style={styles.productName}>
+                {firstItem ? firstItem.product.name : 'Product'}
               </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Track Order Button */}
-        <TouchableOpacity 
-          style={styles.trackButton}
-          onPress={() => navigation.navigate('OrderStatus', { order })}
-        >
-          <Ionicons name="location" size={20} color="#FFF" />
-          <Text style={styles.trackButtonText}>Track Order</Text>
-        </TouchableOpacity>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="location-outline" size={18} color="#000" />
-            <Text style={styles.actionButtonText}>Change Address</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="close-circle-outline" size={18} color="#000" />
-            <Text style={styles.actionButtonText}>Cancel Order</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Order Summary */}
-        <TouchableOpacity 
-          style={styles.summarySection}
-          onPress={() => setSummaryExpanded(!summaryExpanded)}
-        >
-          <View style={styles.summaryHeader}>
-            <Text style={styles.summaryTitle}>Order Summary</Text>
-            <Ionicons 
-              name={summaryExpanded ? 'chevron-up' : 'chevron-down'} 
-              size={20} 
-              color="#6B7280" 
-            />
-          </View>
-
-          {summaryExpanded && (
-            <View style={styles.summaryContent}>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Item subtotal</Text>
-                <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Delivery</Text>
-                <Text style={styles.summaryValue}>${delivery.toFixed(2)}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Tax</Text>
-                <Text style={styles.summaryValue}>${tax.toFixed(2)}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.discountLabel}>Discount</Text>
-                <Text style={styles.discountValue}>-${discount.toFixed(2)}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.summaryRow}>
-                <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalValue}>${order.total.toFixed(2)}</Text>
+              <View style={styles.ratingRow}>
+                <Ionicons name="star" size={14} color="#F59E0B" />
+                <Text style={styles.ratingText}>4.5/5</Text>
               </View>
             </View>
-          )}
-        </TouchableOpacity>
-
-        {/* Delivery Address */}
-        <View style={styles.addressSection}>
-          <View style={styles.addressHeader}>
-            <Ionicons name="location" size={20} color="#6B7280" />
-            <Text style={styles.addressTitle}>Delivery Address</Text>
+            <View style={styles.statusBadge}>
+              <Ionicons name="cube-outline" size={16} color="#5B9FED" />
+              <Text style={styles.statusText}>Shipping</Text>
+            </View>
           </View>
-          <Text style={styles.addressText}>
-            {order.address ? `${order.address.address}, ${order.address.city}` : '2847 Maple Street, Apt 4B, Springfield'}
-          </Text>
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity style={styles.trackButton}>
+              <Text style={styles.trackButtonText}>Track Order</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel Order</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Getting Started */}
-        <View style={styles.guidesSection}>
-          <Text style={styles.guidesTitle}>Getting Started</Text>
-          
-          {GUIDES.map((guide) => (
-            <TouchableOpacity key={guide.id} style={styles.guideCard}>
-              <View style={[styles.guideIcon, { backgroundColor: guide.iconColor + '20' }]}>
-                <Ionicons name={guide.icon} size={24} color={guide.iconColor} />
-              </View>
-              <View style={styles.guideContent}>
-                <Text style={styles.guideTitle}>{guide.title}</Text>
-                <Text style={styles.guideSubtitle}>{guide.subtitle}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
+        {/* Tabs */}
+        <View style={styles.tabsContainer}>
+          {TABS.map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={styles.tab}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Ionicons 
+                name={
+                  tab === 'Tracking' ? 'location-outline' :
+                  tab === 'Order Details' ? 'document-text-outline' :
+                  tab === 'Setup' ? 'bulb-outline' :
+                  'star-outline'
+                } 
+                size={22} 
+                color={activeTab === tab ? '#5B9FED' : '#9CA3AF'} 
+              />
+              <Text style={[
+                styles.tabText,
+                activeTab === tab && styles.tabTextActive
+              ]}>
+                {tab}
+              </Text>
+              {activeTab === tab && <View style={styles.tabIndicator} />}
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Product Guide Button */}
-        <TouchableOpacity style={styles.productGuideButton}>
-          <Ionicons name="book-outline" size={20} color="#FFF" />
-          <Text style={styles.productGuideText}>Open Full Product Guide</Text>
-        </TouchableOpacity>
+        {/* Tracking Content */}
+        {activeTab === 'Tracking' && (
+          <>
+            {/* Carrier Info */}
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Carrier</Text>
+              <Text style={styles.infoValue}>UPS</Text>
+            </View>
 
-        {/* Customer Feedback */}
-        <View style={styles.feedbackSection}>
-          <View style={styles.feedbackHeader}>
-            <Text style={styles.feedbackTitle}>Customer Feedback</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Tracking number</Text>
+              <Text style={styles.infoValue}>12999AA10123456784</Text>
+            </View>
+
+            <View style={styles.infoSection}>
+              <Text style={styles.infoLabel}>Last update</Text>
+              <Text style={styles.infoValue}>Today at 9:42 AM</Text>
+            </View>
+
+            {/* Map */}
+            <View style={styles.mapContainer}>
+              <View style={styles.mapGrid}>
+                {[...Array(6)].map((_, row) => (
+                  <View key={row} style={styles.mapRow}>
+                    {[...Array(8)].map((_, col) => (
+                      <View key={col} style={styles.mapCell} />
+                    ))}
+                  </View>
+                ))}
+              </View>
+              <View style={styles.mapPin}>
+                <View style={styles.pinCircle}>
+                  <Ionicons name="location" size={24} color="#FFF" />
+                </View>
+              </View>
+            </View>
+
+            {/* Tracking Timeline */}
+            <View style={styles.timelineSection}>
+              <Text style={styles.timelineTitle}>Tracking timeline</Text>
+              
+              <View style={styles.timeline}>
+                {TRACKING_TIMELINE.map((item, index) => (
+                  <View key={item.id} style={styles.timelineItem}>
+                    <View style={styles.timelineLeftColumn}>
+                      <View style={[
+                        styles.timelineDot,
+                        item.current && styles.timelineDotCurrent,
+                        item.completed && !item.current && styles.timelineDotCompleted,
+                      ]} />
+                      {index < TRACKING_TIMELINE.length - 1 && (
+                        <View style={styles.timelineLine} />
+                      )}
+                    </View>
+                    <View style={styles.timelineContent}>
+                      <Text style={[
+                        styles.timelineTitle,
+                        item.current && styles.timelineTitleCurrent,
+                      ]}>
+                        {item.title}
+                      </Text>
+                      {item.time && (
+                        <Text style={styles.timelineTime}>{item.time}</Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Bottom Buttons */}
+            <TouchableOpacity style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Track on carrier site</Text>
+              <Ionicons name="open-outline" size={18} color="#FFF" />
             </TouchableOpacity>
-          </View>
 
-          <View style={styles.ratingContainer}>
-            <View style={styles.stars}>
-              {[...Array(5)].map((_, i) => (
-                <Ionicons key={i} name="star" size={16} color="#F59E0B" />
-              ))}
-            </View>
-            <Text style={styles.ratingScore}>4.8</Text>
-            <Text style={styles.reviewCount}>• 1.2k reviews</Text>
-          </View>
+            <TouchableOpacity style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Need help</Text>
+              <Ionicons name="help-circle-outline" size={18} color="#5B9FED" />
+            </TouchableOpacity>
+          </>
+        )}
 
-          <View style={styles.reviewCard}>
-            <Text style={styles.reviewText}>
-              "Great quality and exactly as described. Delivery was fast and packaging was secure. 
-              Highly recommend for daily use!"
-            </Text>
-            <View style={styles.reviewerInfo}>
-              <View style={styles.reviewerAvatar}>
-                <Text style={styles.reviewerInitials}>SM</Text>
-              </View>
-              <Text style={styles.reviewerName}>Sarah M.</Text>
-              <View style={styles.verifiedBadge}>
-                <Text style={styles.verifiedText}>VERIFIED BUYER</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Share Section */}
-        <View style={styles.shareSection}>
-          <View style={styles.shareIconContainer}>
-            <Ionicons name="share-social" size={32} color="#10B981" />
-          </View>
-          <Text style={styles.shareTitle}>Love your purchase?</Text>
-          <Text style={styles.shareSubtitle}>
-            Share your experience with friends and help them discover something great
-          </Text>
-          <TouchableOpacity style={styles.shareButton}>
-            <Ionicons name="share-outline" size={18} color="#000" />
-            <Text style={styles.shareButtonText}>Share with a friend</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ height: 100 }} />
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -273,16 +223,16 @@ export default function OrderDetailsScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 12,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   backButton: {
     width: 40,
@@ -290,401 +240,302 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
-  },
   headerTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    fontWeight: '500',
-    letterSpacing: 0.5,
-  },
-  menuButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontWeight: '600',
+    color: '#1F2937',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
   },
-  deliverySection: {
-    marginBottom: 20,
+  orderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
   },
-  deliveryLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  deliveryRow: {
+  orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    marginBottom: 16,
+  },
+  orderLabel: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  orderId: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
   },
   deliveryDate: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#000',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  productRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  productImageBox: {
+    width: 56,
+    height: 56,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 12,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+  },
+  productImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1F2937',
   },
   statusBadge: {
-    backgroundColor: '#D1FAE5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
+    gap: 4,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#10B981',
-  },
-  progressTracker: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-    paddingHorizontal: 10,
-  },
-  progressStep: {
-    alignItems: 'center',
-    flex: 1,
-    position: 'relative',
-  },
-  progressIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  progressIconCompleted: {
-    backgroundColor: '#10B981',
-  },
-  progressLine: {
-    position: 'absolute',
-    top: 24,
-    left: '50%',
-    right: '-50%',
-    height: 2,
-    backgroundColor: '#E5E7EB',
-    zIndex: -1,
-  },
-  progressLineCompleted: {
-    backgroundColor: '#10B981',
-  },
-  progressLabel: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#9CA3AF',
-    textAlign: 'center',
-  },
-  progressLabelCompleted: {
-    color: '#000',
-  },
-  trackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1F2937',
-    paddingVertical: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    gap: 8,
-  },
-  trackButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFF',
+    color: '#5B9FED',
   },
   actionButtons: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
   },
-  actionButton: {
+  trackButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 6,
-  },
-  actionButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#000',
-  },
-  summarySection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-  },
-  summaryContent: {
-    marginTop: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-  },
-  discountLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#10B981',
-  },
-  discountValue: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#10B981',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E5E7EB',
-    marginVertical: 12,
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-  },
-  totalValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#000',
-  },
-  addressSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-  },
-  addressHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  addressTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000',
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-  },
-  guidesSection: {
-    marginBottom: 16,
-  },
-  guidesTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#000',
-    marginBottom: 16,
-  },
-  guideCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  guideIcon: {
-    width: 48,
-    height: 48,
+    backgroundColor: '#5B9FED',
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
   },
-  guideContent: {
-    flex: 1,
-  },
-  guideTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 2,
-  },
-  guideSubtitle: {
-    fontSize: 13,
-    color: '#6B7280',
-  },
-  productGuideButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1F2937',
-    paddingVertical: 16,
-    borderRadius: 16,
-    marginBottom: 24,
-    gap: 8,
-  },
-  productGuideText: {
-    fontSize: 16,
+  trackButtonText: {
+    fontSize: 14,
     fontWeight: '700',
     color: '#FFF',
   },
-  feedbackSection: {
-    marginBottom: 24,
-  },
-  feedbackHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#5B9FED',
   },
-  feedbackTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#000',
-  },
-  seeAllText: {
+  cancelButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#10B981',
+    fontWeight: '700',
+    color: '#5B9FED',
   },
-  ratingContainer: {
+  tabsContainer: {
     flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
     alignItems: 'center',
+    paddingVertical: 12,
+    position: 'relative',
+  },
+  tabText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  tabTextActive: {
+    color: '#5B9FED',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: '#5B9FED',
+    borderRadius: 1,
+  },
+  infoSection: {
     marginBottom: 16,
-    gap: 6,
   },
-  stars: {
-    flexDirection: 'row',
-    gap: 2,
+  infoLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 4,
   },
-  ratingScore: {
+  infoValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: '#1F2937',
   },
-  reviewCount: {
-    fontSize: 14,
-    color: '#9CA3AF',
+  mapContainer: {
+    height: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: '#E8F4E8',
+    marginBottom: 20,
   },
-  reviewCard: {
+  mapGrid: {
+    flex: 1,
+  },
+  mapRow: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  mapCell: {
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: '#D4ECD4',
+  },
+  mapPin: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+  },
+  pinCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#5B9FED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timelineSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
+    marginBottom: 16,
   },
-  reviewText: {
-    fontSize: 14,
-    color: '#374151',
-    lineHeight: 20,
-    marginBottom: 12,
+  timelineTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 16,
   },
-  reviewerInfo: {
+  timeline: {
+    paddingLeft: 8,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    paddingBottom: 16,
+  },
+  timelineLeftColumn: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  timelineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#E5E7EB',
+  },
+  timelineDotCurrent: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#1F2937',
+  },
+  timelineDotCompleted: {
+    backgroundColor: '#D1D5DB',
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: '#E5E7EB',
+    marginVertical: 4,
+  },
+  timelineContent: {
+    flex: 1,
+    paddingTop: -2,
+  },
+  timelineTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    marginBottom: 2,
+  },
+  timelineTitleCurrent: {
+    color: '#1F2937',
+    fontWeight: '700',
+  },
+  timelineTime: {
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+  primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#5B9FED',
+    paddingVertical: 16,
+    borderRadius: 50,
+    marginBottom: 12,
     gap: 8,
   },
-  reviewerAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E0E7FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reviewerInitials: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#4F46E5',
-  },
-  reviewerName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-  },
-  verifiedBadge: {
-    backgroundColor: '#DBEAFE',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  verifiedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#3B82F6',
-    letterSpacing: 0.5,
-  },
-  shareSection: {
-    backgroundColor: '#D1FAE5',
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
-  },
-  shareIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  shareTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#000',
-    marginBottom: 8,
-  },
-  shareSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  shareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 6,
-  },
-  shareButtonText: {
+  primaryButtonText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#000',
+    color: '#FFF',
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: '#5B9FED',
+    gap: 8,
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#5B9FED',
   },
 });
-

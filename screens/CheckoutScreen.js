@@ -7,69 +7,54 @@ import {
   TouchableOpacity,
   TextInput,
   StatusBar,
+  Image,
 } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../context/CartContext';
 
-const PAYMENT_METHODS = [
-  { id: 'card', name: 'Credit/Debit Card', icon: 'card-outline' },
-  { id: 'upi', name: 'UPI', icon: 'phone-portrait-outline' },
-  { id: 'cod', name: 'Cash on Delivery', icon: 'cash-outline' },
-];
-
 export default function CheckoutScreen({ navigation }) {
-  const { cartItems, getTotalPrice, placeOrder, savedAddress } = useCart();
-  const [selectedPayment, setSelectedPayment] = useState('card');
-  const [useSavedAddress, setUseSavedAddress] = useState(!!savedAddress);
-  const [formData, setFormData] = useState(
-    savedAddress || {
-      name: '',
-      phone: '',
-      address: '',
-      city: '',
-      pincode: '',
-    }
-  );
+  const { cartTotal, cartItems, placeOrder, savedAddress } = useCart();
+  
+  const [email, setEmail] = useState('rumenhussen@gmail.com');
+  const [phone, setPhone] = useState('+88-692 -764-269');
+  const [address, setAddress] = useState('Newshall St 36, London, 12908 - UK');
+  const [paymentMethod, setPaymentMethod] = useState('Paypal Card');
 
-  const handlePlaceOrder = () => {
-    // Validate form
-    if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.pincode) {
-      alert('Please fill all the fields');
-      return;
-    }
+  const subtotal = cartTotal;
+  const shipping = 40.90;
+  const total = subtotal + shipping;
 
-    // Place order with address
-    const order = placeOrder(formData);
-    
-    // Navigate to success screen
+  const handlePayment = () => {
+    const order = placeOrder({
+      email,
+      phone,
+      address,
+      paymentMethod,
+    });
+
     navigation.navigate('OrderSuccess', { 
       orderId: order.id,
       total: order.total,
       estimatedDelivery: order.estimatedDelivery,
       items: order.items,
-      address: formData,
+      address: { address },
     });
   };
 
-  const subtotal = getTotalPrice();
-  const tax = subtotal * 0.1;
-  const shipping = 0;
-  const total = subtotal + tax + shipping;
-
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
       
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
-          style={styles.headerButton}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Checkout</Text>
-        <View style={styles.headerButton} />
+        <View style={styles.backButton} />
       </View>
 
       <ScrollView 
@@ -77,191 +62,117 @@ export default function CheckoutScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Shipping Address */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="location-outline" size={24} color="#0066FF" />
-            <Text style={styles.sectionTitle}>Shipping Address</Text>
+        {/* Contact Information */}
+        <Text style={styles.sectionTitle}>Contact Information</Text>
+        
+        <View style={styles.inputGroup}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="mail-outline" size={24} color="#6B7280" />
           </View>
+          <View style={styles.inputContent}>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+            <Text style={styles.inputLabel}>Email</Text>
+          </View>
+          <TouchableOpacity style={styles.editButton}>
+            <Ionicons name="pencil" size={20} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
 
-          {savedAddress && (
-            <TouchableOpacity 
-              style={styles.savedAddressToggle}
-              onPress={() => {
-                setUseSavedAddress(!useSavedAddress);
-                if (!useSavedAddress) {
-                  setFormData(savedAddress);
-                } else {
-                  setFormData({
-                    name: '',
-                    phone: '',
-                    address: '',
-                    city: '',
-                    pincode: '',
-                  });
-                }
-              }}
-            >
-              <View style={styles.checkboxContainer}>
-                <View style={[styles.checkbox, useSavedAddress && styles.checkboxChecked]}>
-                  {useSavedAddress && <Ionicons name="checkmark" size={16} color="#FFF" />}
+        <View style={styles.inputGroup}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="call-outline" size={24} color="#6B7280" />
+          </View>
+          <View style={styles.inputContent}>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+            <Text style={styles.inputLabel}>Phone</Text>
+          </View>
+          <TouchableOpacity style={styles.editButton}>
+            <Ionicons name="pencil" size={20} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Address */}
+        <Text style={styles.sectionTitle}>Address</Text>
+        
+        <TouchableOpacity style={styles.addressDropdown}>
+          <Text style={styles.addressText}>{address}</Text>
+          <Ionicons name="chevron-down" size={20} color="#6B7280" />
+        </TouchableOpacity>
+
+        {/* Map Preview */}
+        <View style={styles.mapContainer}>
+          <View style={styles.mapPlaceholder}>
+            {/* Map grid pattern */}
+            <View style={styles.mapGrid}>
+              {[...Array(6)].map((_, row) => (
+                <View key={row} style={styles.mapRow}>
+                  {[...Array(8)].map((_, col) => (
+                    <View key={col} style={styles.mapCell} />
+                  ))}
                 </View>
-                <Text style={styles.checkboxLabel}>Use saved address</Text>
-              </View>
-              {useSavedAddress && (
-                <View style={styles.savedAddressPreview}>
-                  <Text style={styles.savedAddressText}>{savedAddress.name}</Text>
-                  <Text style={styles.savedAddressText}>{savedAddress.address}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
-
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your name"
-                value={formData.name}
-                onChangeText={(text) => setFormData({...formData, name: text})}
-              />
+              ))}
             </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter phone number"
-                keyboardType="phone-pad"
-                value={formData.phone}
-                onChangeText={(text) => setFormData({...formData, phone: text})}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Address</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Enter your address"
-                multiline
-                numberOfLines={3}
-                value={formData.address}
-                onChangeText={(text) => setFormData({...formData, address: text})}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={[styles.inputContainer, { flex: 1, marginRight: 12 }]}>
-                <Text style={styles.inputLabel}>City</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="City"
-                  value={formData.city}
-                  onChangeText={(text) => setFormData({...formData, city: text})}
-                />
-              </View>
-
-              <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Pincode</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Pincode"
-                  keyboardType="number-pad"
-                  value={formData.pincode}
-                  onChangeText={(text) => setFormData({...formData, pincode: text})}
-                />
+            {/* Location Pin */}
+            <View style={styles.mapPin}>
+              <View style={styles.pinCircle}>
+                <Ionicons name="location" size={28} color="#FFF" />
               </View>
             </View>
           </View>
         </View>
 
         {/* Payment Method */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="wallet-outline" size={24} color="#0066FF" />
-            <Text style={styles.sectionTitle}>Payment Method</Text>
+        <Text style={styles.sectionTitle}>Payment Method</Text>
+        
+        <TouchableOpacity style={styles.paymentCard}>
+          <View style={styles.paypalLogo}>
+            <Text style={styles.paypalText}>P</Text>
+          </View>
+          <View style={styles.paymentInfo}>
+            <Text style={styles.paymentName}>Paypal Card</Text>
+            <Text style={styles.cardNumber}>**** **** 0696 4629</Text>
+          </View>
+          <Ionicons name="chevron-down" size={20} color="#6B7280" />
+        </TouchableOpacity>
+
+        {/* Summary */}
+        <View style={styles.summarySection}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Subtotal</Text>
+            <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
           </View>
 
-          <View style={styles.paymentMethods}>
-            {PAYMENT_METHODS.map((method) => (
-              <TouchableOpacity
-                key={method.id}
-                style={[
-                  styles.paymentCard,
-                  selectedPayment === method.id && styles.paymentCardActive,
-                ]}
-                onPress={() => setSelectedPayment(method.id)}
-              >
-                <View style={styles.paymentLeft}>
-                  <View style={[
-                    styles.paymentIcon,
-                    selectedPayment === method.id && styles.paymentIconActive,
-                  ]}>
-                    <Ionicons 
-                      name={method.icon} 
-                      size={24} 
-                      color={selectedPayment === method.id ? "#0066FF" : "#6B7280"} 
-                    />
-                  </View>
-                  <Text style={[
-                    styles.paymentName,
-                    selectedPayment === method.id && styles.paymentNameActive,
-                  ]}>
-                    {method.name}
-                  </Text>
-                </View>
-                {selectedPayment === method.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#0066FF" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Order Summary */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="receipt-outline" size={24} color="#0066FF" />
-            <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Shopping</Text>
+            <Text style={styles.summaryValue}>${shipping.toFixed(2)}</Text>
           </View>
 
-          <View style={styles.summary}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Items ({cartItems.length})</Text>
-              <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Shipping</Text>
-              <Text style={styles.summaryValue}>Free</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tax (10%)</Text>
-              <Text style={styles.summaryValue}>${tax.toFixed(2)}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
-            </View>
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total Cost</Text>
+            <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
           </View>
         </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bottom Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.totalSection}>
-          <Text style={styles.totalBottomLabel}>Total Amount</Text>
-          <Text style={styles.totalBottomValue}>${total.toFixed(2)}</Text>
-        </View>
+      {/* Payment Button */}
+      <View style={styles.bottomContainer}>
         <TouchableOpacity 
-          style={styles.placeOrderButton}
-          onPress={handlePlaceOrder}
+          style={styles.paymentButton}
+          onPress={handlePayment}
         >
-          <Text style={styles.placeOrderText}>Place Order</Text>
-          <Ionicons name="arrow-forward" size={20} color="#FFF" />
+          <Text style={styles.paymentButtonText}>Payment</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -271,251 +182,203 @@ export default function CheckoutScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 12,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
-  headerButton: {
+  backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F5F5F7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#000',
+    color: '#1F2937',
+    marginBottom: 14,
+    marginTop: 16,
   },
-  form: {
-    gap: 16,
+  inputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
   },
-  inputContainer: {
-    gap: 8,
+  iconContainer: {
+    marginRight: 16,
   },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+  inputContent: {
+    flex: 1,
   },
   input: {
-    backgroundColor: '#F5F5F7',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    color: '#000',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
-    paddingTop: 14,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  savedAddressToggle: {
-    backgroundColor: '#EBF5FF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#0066FF',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#0066FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#0066FF',
-  },
-  checkboxLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#000',
+    color: '#1F2937',
+    padding: 0,
+    marginBottom: 2,
   },
-  savedAddressPreview: {
-    paddingLeft: 36,
+  inputLabel: {
+    fontSize: 11,
+    color: '#9CA3AF',
   },
-  savedAddressText: {
-    fontSize: 13,
+  editButton: {
+    padding: 8,
+  },
+  addressDropdown: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
+  },
+  addressText: {
+    fontSize: 14,
     color: '#6B7280',
-    lineHeight: 18,
+    flex: 1,
   },
-  paymentMethods: {
-    gap: 12,
+  mapContainer: {
+    marginBottom: 24,
+  },
+  mapPlaceholder: {
+    height: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: '#E8F4E8',
+  },
+  mapGrid: {
+    flex: 1,
+  },
+  mapRow: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  mapCell: {
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: '#D4ECD4',
+  },
+  mapPin: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+  },
+  pinCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#5B9FED',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   paymentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F5F5F7',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    marginBottom: 20,
   },
-  paymentCardActive: {
-    backgroundColor: '#EBF5FF',
-    borderColor: '#0066FF',
-  },
-  paymentLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  paymentIcon: {
+  paypalLogo: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: '#E5E7EB',
+    borderRadius: 24,
+    backgroundColor: '#003087',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 12,
   },
-  paymentIconActive: {
-    backgroundColor: '#DBEAFE',
+  paypalText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+  paymentInfo: {
+    flex: 1,
   },
   paymentName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 2,
   },
-  paymentNameActive: {
-    color: '#000',
+  cardNumber: {
+    fontSize: 13,
+    color: '#9CA3AF',
   },
-  summary: {
-    backgroundColor: '#F5F5F7',
-    borderRadius: 16,
-    padding: 20,
+  summarySection: {
+    marginBottom: 20,
+    marginTop: 8,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    alignItems: 'center',
+    marginBottom: 14,
   },
   summaryLabel: {
     fontSize: 15,
     color: '#6B7280',
-    fontWeight: '500',
+    fontWeight: '400',
   },
   summaryValue: {
-    fontSize: 15,
-    color: '#000',
+    fontSize: 17,
     fontWeight: '600',
+    color: '#1F2937',
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#D1D5DB',
-    marginVertical: 12,
+  totalRow: {
+    marginTop: 6,
   },
   totalLabel: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
-  },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0066FF',
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  totalSection: {
-    flex: 1,
-  },
-  totalBottomLabel: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  totalBottomValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#000',
-  },
-  placeOrderButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0066FF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    shadowColor: '#0066FF',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  placeOrderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFF',
+    color: '#1F2937',
+  },
+  totalValue: {
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  bottomContainer: {
+    backgroundColor: '#F8F9FA',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 30,
+  },
+  paymentButton: {
+    backgroundColor: '#5B9FED',
+    paddingVertical: 18,
+    borderRadius: 50,
+    alignItems: 'center',
+  },
+  paymentButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });
-
