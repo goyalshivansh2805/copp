@@ -46,7 +46,7 @@ const NEW_ARRIVAL = {
 };
 
 export default function HomeScreen({ navigation }) {
-  const { cartItemCount } = useCart();
+  const { cartItemCount, latestOrder } = useCart();
 
   return (
     <View style={styles.container}>
@@ -99,34 +99,38 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* Brand Pills */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.brandsContainer}
-          contentContainerStyle={styles.brandsContent}
-        >
-          {BRANDS.map((brand) => (
-            <TouchableOpacity
-              key={brand.id}
-              style={[
-                styles.brandPill,
-                brand.selected && styles.brandPillSelected,
-              ]}
-            >
-              {brand.selected ? (
-                <>
-                  <View style={styles.brandIconCircleSelected}>
-                    <Text style={styles.brandIconSelected}>✓</Text>
-                  </View>
-                  <Text style={styles.brandTextSelected}>Nike</Text>
-                </>
-              ) : (
-                <Text style={styles.brandTextUnselected}>{brand.name}</Text>
-              )}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* Order Status Banner */}
+        {latestOrder ? (
+          <TouchableOpacity 
+            style={styles.orderBanner}
+            onPress={() => navigation.navigate('OrderDetails', { order: latestOrder })}
+          >
+            <View style={styles.orderBannerContent}>
+              <View style={styles.orderBannerIcon}>
+                <Ionicons name="cube-outline" size={24} color="#5B9FED" />
+              </View>
+              <View style={styles.orderBannerText}>
+                <Text style={styles.orderBannerTitle}>Your Order is {latestOrder.status}</Text>
+                <Text style={styles.orderBannerSubtitle}>
+                  Order #{latestOrder.id} • {latestOrder.items?.length || 0} item(s)
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#5B9FED" />
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.orderBanner}>
+            <View style={styles.orderBannerContent}>
+              <View style={styles.orderBannerIcon}>
+                <Ionicons name="bag-outline" size={24} color="#5B9FED" />
+              </View>
+              <View style={styles.orderBannerText}>
+                <Text style={styles.orderBannerTitle}>No orders yet</Text>
+                <Text style={styles.orderBannerSubtitle}>Start shopping to place your first order</Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Popular Shoes */}
         <View style={styles.sectionHeader}>
@@ -290,46 +294,37 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     marginLeft: 12,
   },
-  brandsContainer: {
-    marginBottom: 32,
+  orderBanner: {
+    backgroundColor: '#E8F4FF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 28,
   },
-  brandsContent: {
-    gap: 12,
-  },
-  brandPill: {
+  orderBannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 50,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
     gap: 12,
   },
-  brandPillSelected: {
-    backgroundColor: '#5B9FED',
-  },
-  brandIconCircleSelected: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  orderBannerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  brandIconSelected: {
-    fontSize: 20,
+  orderBannerText: {
+    flex: 1,
+  },
+  orderBannerTitle: {
+    fontSize: 15,
     fontWeight: '700',
-    color: '#5B9FED',
-  },
-  brandTextSelected: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  brandTextUnselected: {
-    fontSize: 13,
-    fontWeight: '600',
     color: '#1F2937',
+    marginBottom: 4,
+  },
+  orderBannerSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
   },
   sectionHeader: {
     flexDirection: 'row',

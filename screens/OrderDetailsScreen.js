@@ -214,6 +214,288 @@ export default function OrderDetailsScreen({ route, navigation }) {
           </>
         )}
 
+        {/* Order Details Content */}
+        {activeTab === 'Order Details' && (
+          <>
+            {/* Items Section */}
+            <Text style={styles.sectionTitle}>Items</Text>
+            
+            {order.items && order.items.map((item, index) => (
+              <View key={index} style={styles.orderItemCard}>
+                <View style={styles.orderItemImageBox}>
+                  <Image 
+                    source={item.product.image}
+                    style={styles.productImage}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.orderItemInfo}>
+                  <Text style={styles.orderItemName}>{item.product.name}</Text>
+                  <Text style={styles.orderItemQty}>Qty: {item.quantity}</Text>
+                  <Text style={styles.orderItemPrice}>${parseFloat(item.product.price).toFixed(2)}</Text>
+                </View>
+                <View style={styles.orderItemRating}>
+                  <Ionicons name="star" size={16} color="#F59E0B" />
+                  <Text style={styles.orderItemRatingText}>4.5/5</Text>
+                </View>
+              </View>
+            ))}
+
+            {/* Total Section */}
+            <View style={styles.totalCard}>
+              <View style={styles.totalHeader}>
+                <Text style={styles.totalTitle}>Total</Text>
+                <Text style={styles.totalAmount}>${parseFloat(order.total).toFixed(2)}</Text>
+                <Ionicons name="chevron-up" size={20} color="#9CA3AF" />
+              </View>
+              
+              <View style={styles.totalBreakdown}>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Subtotal</Text>
+                  <Text style={styles.totalValue}>${(parseFloat(order.total) - 22.50).toFixed(2)}</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Shipping</Text>
+                  <Text style={styles.totalValue}>Free</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Tax</Text>
+                  <Text style={styles.totalValue}>$22.50</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Delivery Address */}
+            <View style={styles.addressSection}>
+              <View style={styles.addressHeader}>
+                <Text style={styles.addressTitle}>Delivery address</Text>
+                <TouchableOpacity style={styles.editButton}>
+                  <Ionicons name="create-outline" size={18} color="#6B7280" />
+                  <Text style={styles.editButtonText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.addressName}>Alex Johnson</Text>
+              <Text style={styles.addressLine}>742 Evergreen Terrace</Text>
+              <Text style={styles.addressLine}>Portland, OR 97205</Text>
+            </View>
+
+            {/* Phone Number */}
+            <View style={styles.phoneSection}>
+              <Text style={styles.phoneTitle}>Phone number</Text>
+              <Text style={styles.phoneNumber}>(503) 555-0142</Text>
+            </View>
+          </>
+        )}
+
+        {/* Setup Content */}
+        {activeTab === 'Setup' && (
+          <>
+            <Text style={styles.setupIntro}>
+              Here's how you'll use your product once it arrives.
+            </Text>
+
+            {/* Video Player */}
+            <View style={styles.videoContainer}>
+              <View style={styles.videoBox}>
+                <TouchableOpacity style={styles.playButton}>
+                  <Ionicons name="play" size={32} color="#1F2937" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.videoTitle}>Quick setup guide (2 min)</Text>
+              <Text style={styles.videoSubtitle}>Get started in minutes</Text>
+            </View>
+
+            {/* Quick Setup */}
+            <View style={styles.setupSection}>
+              <View style={styles.setupHeader}>
+                <Ionicons name="information-circle-outline" size={20} color="#1F2937" />
+                <Text style={styles.setupTitle}>Quick setup</Text>
+              </View>
+              
+              <View style={styles.setupSteps}>
+                <View style={styles.setupStep}>
+                  <Text style={styles.stepNumber}>1</Text>
+                  <Text style={styles.stepText}>
+                    Charge your headphones fully before first use (about 2 hours)
+                  </Text>
+                </View>
+                <View style={styles.setupStep}>
+                  <Text style={styles.stepNumber}>2</Text>
+                  <Text style={styles.stepText}>
+                    Download the companion app to customize sound profiles
+                  </Text>
+                </View>
+                <View style={styles.setupStep}>
+                  <Text style={styles.stepNumber}>3</Text>
+                  <Text style={styles.stepText}>
+                    Hold the power button for 3 seconds to enter pairing mode
+                  </Text>
+                </View>
+                <View style={styles.setupStep}>
+                  <Text style={styles.stepNumber}>4</Text>
+                  <Text style={styles.stepText}>
+                    Select "WH-Headphones" from your Bluetooth menu
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Usage Tips */}
+            <View style={styles.setupSection}>
+              <View style={styles.setupHeader}>
+                <Ionicons name="play-outline" size={20} color="#1F2937" />
+                <Text style={styles.setupTitle}>Usage tips</Text>
+              </View>
+              
+              <View style={styles.tipsList}>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Press once to play/pause music</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Double-press to skip tracks</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Hold to activate voice assistant</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Swipe up/down on right earcup for volume</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Care Instructions */}
+            <View style={styles.setupSection}>
+              <View style={styles.setupHeader}>
+                <Ionicons name="heart-outline" size={20} color="#1F2937" />
+                <Text style={styles.setupTitle}>Care instructions</Text>
+              </View>
+              
+              <View style={styles.tipsList}>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Store in the included case when not in use</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Clean ear cushions with a soft, dry cloth</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Avoid exposing to extreme temperatures</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.tipText}>Keep away from moisture and liquids</Text>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* Reviews Content */}
+        {activeTab === 'Reviews' && (
+          <>
+            {/* Rating Summary */}
+            <View style={styles.ratingSummary}>
+              <View style={styles.ratingHeader}>
+                <Ionicons name="star" size={48} color="#F59E0B" />
+                <Text style={styles.ratingScore}>4.6</Text>
+              </View>
+              <Text style={styles.reviewCount}>1,247</Text>
+              <Text style={styles.reviewsLabel}>reviews</Text>
+            </View>
+
+            {/* Rating Breakdown */}
+            <View style={styles.ratingBreakdown}>
+              {[
+                { stars: 5, count: 892, percentage: 0.715 },
+                { stars: 4, count: 234, percentage: 0.188 },
+                { stars: 3, count: 78, percentage: 0.063 },
+                { stars: 2, count: 28, percentage: 0.022 },
+                { stars: 1, count: 15, percentage: 0.012 },
+              ].map((item) => (
+                <View key={item.stars} style={styles.ratingRow}>
+                  <Text style={styles.starNumber}>{item.stars}</Text>
+                  <Ionicons name="star-outline" size={16} color="#9CA3AF" />
+                  <View style={styles.ratingBarContainer}>
+                    <View 
+                      style={[
+                        styles.ratingBarFill, 
+                        { width: `${item.percentage * 100}%` }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={styles.ratingCount}>{item.count}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Reviews List */}
+            <View style={styles.reviewsList}>
+              {/* Review 1 */}
+              <View style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewerInfo}>
+                    <Text style={styles.reviewerName}>Sarah M.</Text>
+                    <View style={styles.verifiedBadge}>
+                      <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                      <Text style={styles.verifiedText}>Verified</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.reviewDate}>Jan 10, 2026</Text>
+                </View>
+                
+                <View style={styles.reviewStars}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Ionicons key={star} name="star" size={18} color="#F59E0B" />
+                  ))}
+                </View>
+                
+                <Text style={styles.reviewTitle}>Best headphones I've owned</Text>
+                <Text style={styles.reviewText}>
+                  The noise cancellation is incredible. I use these daily for work calls and they make a huge difference in sound quality.
+                </Text>
+              </View>
+
+              {/* Review 2 */}
+              <View style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewerInfo}>
+                    <Text style={styles.reviewerName}>Michael R.</Text>
+                    <View style={styles.verifiedBadge}>
+                      <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                      <Text style={styles.verifiedText}>Verified</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.reviewDate}>Jan 8, 2026</Text>
+                </View>
+                
+                <View style={styles.reviewStars}>
+                  {[1, 2, 3, 4].map((star) => (
+                    <Ionicons key={star} name="star" size={18} color="#F59E0B" />
+                  ))}
+                  <Ionicons name="star-outline" size={18} color="#D1D5DB" />
+                </View>
+                
+                <Text style={styles.reviewTitle}>Great comfort, long battery life</Text>
+                <Text style={styles.reviewText}>
+                  Very comfortable for long wearing sessions. Battery easily lasts all day. Only minor complaint is the case is a bit bulky.
+                </Text>
+              </View>
+            </View>
+
+            {/* View All Button */}
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllButtonText}>View All reviews</Text>
+              <Ionicons name="open-outline" size={18} color="#FFF" />
+            </TouchableOpacity>
+          </>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -537,5 +819,375 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#5B9FED',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 16,
+  },
+  orderItemCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  orderItemImageBox: {
+    width: 72,
+    height: 72,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 16,
+    marginRight: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orderItemInfo: {
+    flex: 1,
+  },
+  orderItemName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  orderItemQty: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 6,
+  },
+  orderItemPrice: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  orderItemRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  orderItemRatingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  totalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  totalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  totalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    flex: 1,
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginRight: 8,
+  },
+  totalBreakdown: {
+    gap: 12,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalLabel: {
+    fontSize: 15,
+    color: '#6B7280',
+  },
+  totalValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  addressSection: {
+    marginBottom: 20,
+  },
+  addressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  addressTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#6B7280',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  editButtonText: {
+    fontSize: 15,
+    color: '#6B7280',
+  },
+  addressName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  addressLine: {
+    fontSize: 15,
+    color: '#1F2937',
+    lineHeight: 22,
+  },
+  phoneSection: {
+    marginBottom: 20,
+  },
+  phoneTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#6B7280',
+    marginBottom: 8,
+  },
+  phoneNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  setupIntro: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  videoContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+  videoBox: {
+    height: 180,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  playButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  videoTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  videoSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  setupSection: {
+    marginBottom: 24,
+  },
+  setupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  setupTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  setupSteps: {
+    gap: 16,
+  },
+  setupStep: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  stepNumber: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    width: 20,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1F2937',
+    lineHeight: 22,
+  },
+  tipsList: {
+    gap: 12,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  bullet: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#9CA3AF',
+    marginTop: 9,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1F2937',
+    lineHeight: 22,
+  },
+  ratingSummary: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  ratingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  ratingScore: {
+    fontSize: 56,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  reviewCount: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  reviewsLabel: {
+    fontSize: 16,
+    color: '#9CA3AF',
+  },
+  ratingBreakdown: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    gap: 12,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  starNumber: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6B7280',
+    width: 12,
+  },
+  ratingBarContainer: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  ratingBarFill: {
+    height: '100%',
+    backgroundColor: '#F59E0B',
+    borderRadius: 4,
+  },
+  ratingCount: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6B7280',
+    width: 40,
+    textAlign: 'right',
+  },
+  reviewsList: {
+    gap: 16,
+    marginBottom: 20,
+  },
+  reviewCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  reviewerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  reviewerName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  verifiedText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  reviewDate: {
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+  reviewStars: {
+    flexDirection: 'row',
+    gap: 4,
+    marginBottom: 12,
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  reviewText: {
+    fontSize: 15,
+    color: '#6B7280',
+    lineHeight: 22,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#5B9FED',
+    paddingVertical: 16,
+    borderRadius: 50,
+    gap: 8,
+  },
+  viewAllButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFF',
   },
 });
